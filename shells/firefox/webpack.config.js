@@ -1,5 +1,5 @@
 const path = require('path')
-const createConfig = require('../createConfig')
+const createConfig = require('../createConfig').default
 
 module.exports = createConfig({
   entry: {

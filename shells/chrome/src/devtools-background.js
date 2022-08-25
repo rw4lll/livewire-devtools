@@ -40,7 +40,6 @@ function createPanelIfHasLivewire () {
 }
 
 // Runtime messages
-
 chrome.runtime.onMessage.addListener(request => {
   if (request === 'vue-panel-load') {
     onPanelLoad()
@@ -52,7 +51,6 @@ chrome.runtime.onMessage.addListener(request => {
 })
 
 // Page context menu entry
-
 function onContextMenu ({ id }) {
   if (id === 'inspect-instance') {
     const src = `window.__LIVEWIRE_DEVTOOLS_GLOBAL_HOOK__`
@@ -75,7 +73,6 @@ function onContextMenu ({ id }) {
 
 // Action that may execute immediatly
 // or later when the Vue panel is ready
-
 function panelAction (cb, message = null) {
   if (created && panelLoaded && panelShown) {
     cb()
@@ -91,14 +88,12 @@ function executePendingAction () {
 }
 
 // Execute pending action when Vue panel is ready
-
 function onPanelLoad () {
   executePendingAction()
   panelLoaded = true
 }
 
 // Manage panel visibility
-
 function onPanelShown () {
   chrome.runtime.sendMessage('vue-panel-shown')
   panelShown = true
@@ -111,7 +106,6 @@ function onPanelHidden () {
 }
 
 // Toasts
-
 function toast (message, type = 'normal') {
   const src = `(function() {
     __LIVEWIRE_DEVTOOLS_TOAST__(\`${message}\`, '${type}');

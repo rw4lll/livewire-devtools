@@ -12,7 +12,7 @@ function handshake (e) {
     let listeners = []
     const bridge = new Bridge({
       listen (fn) {
-        var listener = evt => {
+        const listener = evt => {
           if (evt.data.source === 'livewire-devtools-proxy' && evt.data.payload) {
             fn(evt.data.payload)
           }
@@ -29,8 +29,8 @@ function handshake (e) {
     })
 
     bridge.on('shutdown', () => {
-      listeners.forEach(l => {
-        window.removeEventListener('message', l)
+      listeners.forEach(listener => {
+        window.removeEventListener('message', listener)
       })
       listeners = []
     })

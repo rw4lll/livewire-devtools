@@ -1,10 +1,10 @@
 // the background script runs all the time and serves as a central message
 // hub for each vue devtools (panel + proxy + backend) instance.
+
 const ports = {}
 
 chrome.runtime.onConnect.addListener(port => {
-  let tab
-  let name
+  let tab, name
   if (isNumeric(port.name)) {
     tab = port.name
     name = 'devtools'

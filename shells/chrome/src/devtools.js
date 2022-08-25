@@ -4,13 +4,11 @@ import { initDevTools } from 'src/devtools'
 import Bridge from 'src/bridge'
 
 initDevTools({
-
   /**
    * Inject backend, connect to background, and send back the bridge.
    *
    * @param {Function} cb
    */
-
   connect (cb) {
     // 1. inject backend code into page
     injectScript(chrome.runtime.getURL('build/backend.js'), () => {
