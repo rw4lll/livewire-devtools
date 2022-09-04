@@ -39,10 +39,9 @@
     "circular-json-es6": "^2.0.1",
     "lodash.debounce": "^4.0.8",
     "lodash.groupby": "^4.6.0",
-    "style-loader": "^2.0.0",
-    "vue": "^2.5.13",
-    "vue-router": "^3.0.1",
-    "vuex": "^3.0.1"
+    "vue": "^2.7.10",
+    "vue-router": "^3",
+    "vuex": "^3"
   },
   "devDependencies": {
     "buble": "^0.20.0",
@@ -64,6 +63,7 @@
     "raw-loader": "^4.0",
     "semver": "^7.3",
     "start-server-and-test": "^1.14",
+    "style-loader": "^2.0.0",
     "stylus": "^0.59",
     "stylus-loader": "^4.3.3",
     "terser-webpack-plugin": "^4.2.3",
