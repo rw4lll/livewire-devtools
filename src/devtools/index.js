@@ -7,7 +7,6 @@ import { parse } from '../util'
 import { isChrome, initEnv } from './env'
 import SharedData, { init as initSharedData, destroy as destroySharedData } from 'src/shared-data'
 import storage from './storage'
-import ConfirmPrompt from 'inquirer/lib/prompts/confirm'
 
 // UI
 

@@ -11,7 +11,7 @@ const curVersion = pkg.version
   const { newVersion } = await inquirer.prompt([{
     type: 'input',
     name: 'newVersion',
-    message: `Please provide a version (current: ${curVersion}):`,
+    message: `Please provide a version (current: ${curVersion}):`
   }])
 
   if (!semver.valid(newVersion)) {
