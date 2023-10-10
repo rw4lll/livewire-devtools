@@ -7,11 +7,9 @@ Debug your Livewire component state from within your browser.
 ### Roadmap
 - ~~Chrome Manifest V3 support~~
 - ~~Check FF extension~~
-- Code clean up
-- Bump node to v16
-- Update dependencies and deprecated parts
-- Vue3 && Typescript + Cypress tests
-- ...
+- Bump node version and update dependencies (in progress)
+- Add Livewire v3 support
+- Rewrite tool from scratch with modern stuff (ts, vite, vue3 etc.)
 
 ### Installation
 
