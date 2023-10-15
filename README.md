@@ -5,13 +5,12 @@ Debug your Livewire component state from within your browser.
 <p align="center"><img src="https://raw.githubusercontent.com/rw4lll/livewire-devtools/master/media/screenshot-shadow.png" alt="screenshot"></p>
 
 ### Roadmap
+
 - ~~Chrome Manifest V3 support~~
 - ~~Check FF extension~~
-- Code clean up
-- Bump node to v16
-- Update dependencies and deprecated parts
-- Vue3 && Typescript + Cypress tests
-- ...
+- ~~Bump node version and update dependencies (in progress)~~
+- Add Livewire v3 support (Work in progress)
+- Rewrite tool from scratch with modern stuff (ts, vite, vue3 etc.)
 
 ### Installation
 
@@ -36,35 +35,34 @@ Debug your Livewire component state from within your browser.
 
 ### Manual Installation (Firefox)
 
- 1. Install `web-ext`
+1.  Install `web-ext`
 
-	~~~~
-	$ npm install --global web-ext
-	~~~~
+    ```
+    $ npm install --global web-ext
+    ```
 
-	Or, for Yarn:
+    Or, for Yarn:
 
-	~~~~
-	$ yarn global add web-ext
-	~~~~
+    ```
+    $ yarn global add web-ext
+    ```
 
-	Also, make sure `PATH` is set up. Something like this in `~/.bash_profile`:
+    Also, make sure `PATH` is set up. Something like this in `~/.bash_profile`:
 
-	~~~~
-	$ PATH=$PATH:$(yarn global bin)
-	~~~~
+    ```
+    $ PATH=$PATH:$(yarn global bin)
+    ```
 
- 2. Build and run in Firefox
+2.  Build and run in Firefox
 
-	~~~~
-	$ npm run build:ff
-	$ npm run zip:ff
-	~~~~
+    ```
+    $ npm run build:ff
+    $ npm run zip:ff
+    ```
 
-	When using Yarn, just replace `npm` with `yarn`.
-	
- 3. Open "about:addons" in Firefox browser, then click "Install from file" and select built zip-folder.	
+    When using Yarn, just replace `npm` with `yarn`.
 
+3.  Open "about:addons" in Firefox browser, then click "Install from file" and select built zip-folder.
 
 ### License
 
