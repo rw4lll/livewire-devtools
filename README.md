@@ -7,8 +7,8 @@ Debug your Livewire component state from within your browser.
 ### Roadmap
 - ~~Chrome Manifest V3 support~~
 - ~~Check FF extension~~
-- Bump node version and update dependencies (in progress)
-- Add Livewire v3 support
+- ~~Bump node version and update dependencies (in progress)~~
+- Add Livewire v3 support (Work in progress)
 - Rewrite tool from scratch with modern stuff (ts, vite, vue3 etc.)
 
 ### Installation
