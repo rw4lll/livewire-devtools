@@ -1,9 +1,9 @@
-import { stringify, parse } from "src/util";
+import { stringify, parse, getLivewireVersion } from "src/util";
 
 export function initVuexBackend(hook, bridge) {
   const store = hook.store;
   let recording = true;
-  const livewireVersion = window.__LIVEWIRE_DEVTOOLS_LIVEWIRE_VERSION__ || 2;
+  const livewireVersion = getLivewireVersion();
   // application -> devtool
   const components =
     livewireVersion === 3
@@ -14,35 +14,42 @@ export function initVuexBackend(hook, bridge) {
       checksum: null,
       component: component.id,
       mutation: {
-        type: (component.name || component.fingerprint.name) + " - init",
-        payload: stringify(component.data),
+        type:
+          (component.name || component.fingerprint.name || "unknown") +
+          " - init",
+        payload:
+          livewireVersion === 3
+            ? stringify(component.snapshot.data)
+            : stringify(component.data),
       },
       timestamp: Date.now(),
       snapshot: stringify({
-        state: component.data,
+        state:
+          livewireVersion === 3
+            ? stringify(component.snapshot.data)
+            : stringify(component.data),
         getters: {},
       }),
     });
   });
 
-  if (window.__LIVEWIRE_DEVTOOLS_LIVEWIRE_VERSION__ === 3) {
+  if (livewireVersion === 3) {
     hook.Livewire.hook(
       "commit",
       ({ component, commit, respond, succeed, fail }) => {
         succeed(({ snapshot, effect }) => {
           if (!recording) return;
-          const payload = message.response;
-
+          console.log(snapshot);
           bridge.send("vuex:mutation", {
-            checksum: payload.checksum || payload.serverMemo.checksum,
+            checksum: snapshot.checksum,
             component: component.id,
             mutation: {
-              type: component.name || component.fingerprint.name,
-              payload: stringify(payload),
+              type: component.name,
+              payload: stringify(snapshot),
             },
             timestamp: Date.now(),
             snapshot: stringify({
-              state: component.data,
+              state: snapshot.data,
               getters: {},
             }),
           });
@@ -59,7 +66,7 @@ export function initVuexBackend(hook, bridge) {
       hook.Livewire.hook(livewireHook, (message, component) => {
         if (!recording) return;
         const payload = message.response;
-
+        console.log(payload);
         bridge.send("vuex:mutation", {
           checksum: payload.checksum || payload.serverMemo.checksum,
           component: component.id,

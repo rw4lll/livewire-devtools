@@ -61,8 +61,36 @@ export const SPECIAL_TOKENS = {
   NaN: NAN,
 };
 
-export function findLivewire3ComponentById(id, livewire3Instance) {
-  return livewire3Instance.all().find((component) => component.id === id);
+export function getLivewireVersion() {
+  if (window.hasOwnProperty("__LIVEWIRE_DEVTOOLS_LIVEWIRE_VERSION__")) {
+    return window.__LIVEWIRE_DEVTOOLS_LIVEWIRE_VERSION__;
+  }
+  let livewireVersion;
+  const livewireInstance =
+    window.__LIVEWIRE_DEVTOOLS_GLOBAL_HOOK__.Livewire || window.Livewire;
+  if (
+    livewireInstance.components?.hooks?.availableHooks.includes(
+      "responseReceived"
+    ) ??
+    false
+  ) {
+    livewireVersion = 1;
+  } else if (!livewireInstance.hasOwnProperty("devToolsEnabled")) {
+    livewireVersion = 3;
+  } else {
+    livewireVersion = 2;
+  }
+  window.__LIVEWIRE_DEVTOOLS_LIVEWIRE_VERSION__ = livewireVersion;
+  return livewireVersion;
+}
+
+export function getLivewireComponentById(id, livewireInstance) {
+  const livewireVersion = getLivewireVersion();
+  if (livewireVersion === 3) {
+    return livewireInstance.all().find((component) => component.id === id);
+  } else {
+    return livewireInstance.components.componentsById[id];
+  }
 }
 
 export function specialTokenToString(value) {

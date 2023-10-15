@@ -106,7 +106,6 @@ function initApp(shell) {
     });
 
     bridge.once("ready", (version) => {
-      console.log("Version: " + version);
       store.commit("SHOW_MESSAGE", "Ready. Detected Livewire " + version + ".");
       bridge.send("events:toggle-recording", store.state.events.enabled);
 

@@ -12,7 +12,8 @@ import {
   set,
   parse,
   getComponentName,
-  findLivewire3ComponentById,
+  getLivewireComponentById,
+  getLivewireVersion,
 } from "../util";
 import ComponentSelector from "./component-selector";
 import SharedData, { init as initSharedData } from "src/shared-data";
@@ -49,24 +50,15 @@ function connect() {
     return;
   }
 
+  const livewireVersion = getLivewireVersion();
+
+  //turn off devtools if explicitly set to false
   if (
-    hook.Livewire.components?.hooks?.availableHooks.includes(
-      "responseReceived"
-    ) ??
-    false
+    hook.Livewire.hasOwnProperty("devToolsEnabled") &&
+    !hook.Livewire.devToolsEnabled
   ) {
-    livewireVersion = 1;
-  } else if (typeof hook.Livewire.onPageExpired !== "function") {
-    livewireVersion = 3;
-  } else {
-    livewireVersion = 2;
+    return;
   }
-
-  window.__LIVEWIRE_DEVTOOLS_LIVEWIRE_VERSION__ = livewireVersion;
-
-  // if (!hook.Livewire.devToolsEnabled) {
-  //   return;
-  // }
 
   hook.currentTab = "components";
   bridge.on("switch-tab", (tab) => {
@@ -88,21 +80,14 @@ function connect() {
 
   bridge.on("select-instance", (id) => {
     currentInspectedId = id;
-    const instance =
-      livewireVersion === 3
-        ? findLivewire3ComponentById(id, hook.Livewire)
-        : hook.Livewire.components.componentsById[id];
-    console.log(instance);
+    const instance = getLivewireComponentById(id, hook.Livewire);
     bindToConsole(instance);
     flush();
     bridge.send("instance-selected");
   });
 
   bridge.on("scroll-to-instance", (id) => {
-    const instance =
-      livewireVersion === 3
-        ? findLivewire3ComponentById(id, hook.Livewire)
-        : hook.Livewire.components.componentsById[id];
+    const instance = getLivewireComponentById(id, hook.Livewire);
     instance && scrollIntoView(instance);
   });
 
@@ -116,10 +101,10 @@ function connect() {
     const parsedState = parsedPayload.state;
 
     Object.keys(parsedState).forEach((key) => {
-      const component =
-        livewireVersion === 3
-          ? findLivewire3ComponentById(parsedPayload.component, hook.Livewire)
-          : hook.Livewire.components.componentsById[parsedPayload.component];
+      const component = getLivewireComponentById(
+        parsedPayload.component,
+        hook.Livewire
+      );
       component.set(key, parsedState[key]);
     });
   });
@@ -130,10 +115,7 @@ function connect() {
     let instance;
 
     try {
-      instance =
-        livewireVersion === 3
-          ? findLivewire3ComponentById(id, hook.Livewire)
-          : hook.Livewire.components.componentsById[id];
+      instance = getLivewireComponentById(id, hook.Livewire);
     } catch (err) {
       return;
     }
@@ -190,6 +172,7 @@ function connect() {
       "commit",
       ({ component, commit, respond, succeed, fail }) => {
         succeed(({ snapshot, effect }) => {
+          console.log(12, component, commit, snapshot);
           flush();
         });
       }
@@ -201,6 +184,7 @@ function connect() {
       ? "responseReceived"
       : "message.received";
     hook.Livewire.hook(livewireHook, (component, payload) => {
+      console.log(123, component.response);
       flush();
     });
   }
@@ -215,7 +199,7 @@ function connect() {
 function scan() {
   rootInstances.length = 0;
   const components =
-    livewireVersion === 3
+    getLivewireVersion() === 3
       ? hook.Livewire.all()
       : hook.Livewire.components.components();
   components.forEach((component) => {
@@ -379,7 +363,7 @@ function getInstanceDetails(id) {
   let instance;
 
   try {
-    if (livewireVersion === 3) {
+    if (getLivewireVersion() === 3) {
       instance = hook.Livewire.find(id);
     } else {
       instance = hook.Livewire.components.componentsById[id];
@@ -536,10 +520,7 @@ function setStateValue({ id, path, value, newKey, remove }) {
   let instance;
 
   try {
-    instance =
-      livewireVersion === 3
-        ? findLivewire3ComponentById(id, hook.Livewire)
-        : hook.Livewire.components.componentsById[id];
+    instance = getLivewireComponentById(id, hook.Livewire);
   } catch (err) {
     //
   }
