@@ -363,14 +363,11 @@ function getInstanceDetails(id) {
   let instance;
 
   try {
-    if (getLivewireVersion() === 3) {
-      instance = hook.Livewire.find(id);
-    } else {
-      instance = hook.Livewire.components.componentsById[id];
-    }
+    instance = getLivewireComponentById(id, hook.Livewire);
   } catch (err) {
     return {};
   }
+
   if (!instance) {
     return {};
   } else {
@@ -437,9 +434,11 @@ export function getInstanceName(instance) {
  */
 
 function processState(instance) {
-  return Object.keys(instance.data).map((key) => ({
+  const instanceData =
+    getLivewireVersion() === 3 ? instance.snapshot.data : instance.data;
+  return Object.keys(instanceData).map((key) => ({
     key,
-    value: instance.data[key],
+    value: instanceData[key],
     editable: true,
   }));
 }
@@ -518,6 +517,7 @@ export function inspectInstance(instance) {
 
 function setStateValue({ id, path, value, newKey, remove }) {
   let instance;
+  const livewireVersion = getLivewireVersion();
 
   try {
     instance = getLivewireComponentById(id, hook.Livewire);
@@ -530,7 +530,9 @@ function setStateValue({ id, path, value, newKey, remove }) {
       if (value) {
         parsedValue = parse(value, true);
       }
-      instance.set(path, parsedValue);
+      livewireVersion === 3
+        ? instance.$wire.set(path, parsedValue, true)
+        : instance.set(path, parsedValue);
     } catch (e) {
       console.error(e);
     }
