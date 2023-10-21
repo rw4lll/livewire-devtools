@@ -131,7 +131,6 @@ function initApp(shell) {
     });
 
     bridge.on("vuex:init", (snapshot) => {
-      console.log(snapshot);
       store.commit("vuex/INIT", snapshot);
     });
 

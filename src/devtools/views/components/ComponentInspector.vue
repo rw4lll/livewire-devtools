@@ -84,7 +84,6 @@ export default {
     },
 
     targetName() {
-      console.log(this, this.target);
       return this.$shared.classifyComponents
         ? classify(this.target.name)
         : this.target.name;

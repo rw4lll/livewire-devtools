@@ -105,7 +105,9 @@ function connect() {
         parsedPayload.component,
         hook.Livewire
       );
-      component.set(key, parsedState[key]);
+      getLivewireVersion() === 3
+        ? component.$wire.set(key, parsedState[key])
+        : component.set(key, parsedState[key]);
     });
   });
 
@@ -172,7 +174,6 @@ function connect() {
       "commit",
       ({ component, commit, respond, succeed, fail }) => {
         succeed(({ snapshot, effect }) => {
-          console.log(12, component, commit, snapshot);
           flush();
         });
       }
@@ -184,7 +185,6 @@ function connect() {
       ? "responseReceived"
       : "message.received";
     hook.Livewire.hook(livewireHook, (component, payload) => {
-      console.log(123, component.response);
       flush();
     });
   }

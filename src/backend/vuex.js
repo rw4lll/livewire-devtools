@@ -39,17 +39,30 @@ export function initVuexBackend(hook, bridge) {
       ({ component, commit, respond, succeed, fail }) => {
         succeed(({ snapshot, effect }) => {
           if (!recording) return;
-          console.log(snapshot);
+          const parsedSnapshot = parse(snapshot);
           bridge.send("vuex:mutation", {
-            checksum: snapshot.checksum,
+            checksum: parsedSnapshot.checksum,
             component: component.id,
             mutation: {
               type: component.name,
-              payload: stringify(snapshot),
+              payload: stringify({
+                effects: {
+                  dirty: [],
+                  html: component.effects.html,
+                },
+                serverMemo: {
+                  checksum: parsedSnapshot.checksum,
+                  children: parsedSnapshot.memo.children,
+                  data: parsedSnapshot.data,
+                  dataMeta: [],
+                  errors: parsedSnapshot.memo.errors,
+                  htmlHash: "",
+                },
+              }),
             },
             timestamp: Date.now(),
             snapshot: stringify({
-              state: snapshot.data,
+              state: parsedSnapshot.data,
               getters: {},
             }),
           });
@@ -66,7 +79,6 @@ export function initVuexBackend(hook, bridge) {
       hook.Livewire.hook(livewireHook, (message, component) => {
         if (!recording) return;
         const payload = message.response;
-        console.log(payload);
         bridge.send("vuex:mutation", {
           checksum: payload.checksum || payload.serverMemo.checksum,
           component: component.id,
