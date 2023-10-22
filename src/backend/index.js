@@ -272,9 +272,17 @@ function findQualifiedChildrenFromList (instances) {
  */
 
 function findQualifiedChildren (instance) {
+  let children
+
+  if (instance.serverMemo && instance.serverMemo.children) {
+      children = instance.serverMemo.children
+  } else if (instance.snapshot && instance.snapshot.memo && instance.snapshot.memo.children) {
+      children = instance.snapshot.memo.children
+  }
+
   return isQualified(instance)
     ? capture(instance)
-    : findQualifiedChildrenFromList(instance.$children)
+    : (children ? findQualifiedChildrenFromList(children) : [])
 }
 
 /**
@@ -403,11 +411,9 @@ export function reduceStateList (list) {
  */
 
 export function getInstanceName (instance) {
-  const name = getComponentName(instance.$options)
+  const name = getComponentName(instance)
   if (name) return name
-  return instance.$root === instance
-    ? 'Root'
-    : 'Anonymous Component'
+  return 'Anonymous Component'
 }
 
 /**
