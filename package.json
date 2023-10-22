@@ -1,6 +1,6 @@
 {
-  "name": "livewire-devtools",
-  "version": "1.0.0",
+  "name": "livewire-devtools-next",
+  "version": "1.1.0",
   "description": "devtools for Livewire!",
   "main": "index.js",
   "scripts": {
@@ -37,6 +37,7 @@
   "dependencies": {
     "@vue/ui": "^0.5.1",
     "circular-json-es6": "^2.0.1",
+    "install": "^0.13.0",
     "lodash.debounce": "^4.0.8",
     "lodash.groupby": "^4.6.0",
     "uglifyjs-webpack-plugin": "^1.1.4",
