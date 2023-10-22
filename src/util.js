@@ -74,6 +74,34 @@ export function specialTokenToString (value) {
   return false
 }
 
+export function getLivewireVersion() {
+  if (window.hasOwnProperty("__LIVEWIRE_DEVTOOLS_LIVEWIRE_VERSION__")) {
+    return window.__LIVEWIRE_DEVTOOLS_LIVEWIRE_VERSION__
+  }
+  let livewireVersion
+  const livewireInstance = window.__LIVEWIRE_DEVTOOLS_GLOBAL_HOOK__.Livewire || window.Livewire
+  if (
+    livewireInstance && livewireInstance.components && livewireInstance.components.hooks && livewireInstance.components.hooks.availableHooks.includes('responseReceived')
+  ) {
+    livewireVersion = 1
+  } else if (!livewireInstance.hasOwnProperty("devToolsEnabled")) {
+    livewireVersion = 3
+  } else {
+    livewireVersion = 2
+  }
+  window.__LIVEWIRE_DEVTOOLS_LIVEWIRE_VERSION__ = livewireVersion;
+  return livewireVersion
+}
+
+export function getLivewireComponentById(id, livewireInstance) {
+  const livewireVersion = getLivewireVersion()
+  if (livewireVersion === 3) {
+    return livewireInstance.all().find((component) => component.id === id)
+  } else {
+    return livewireInstance.components.componentsById[id]
+  }
+}
+
 /**
  * Needed to prevent stack overflow
  * while replacing complex objects

@@ -5,7 +5,7 @@ import { highlight, unHighlight, getInstanceRect } from './highlighter'
 import { initVuexBackend } from './vuex'
 import { initEventsBackend } from './events'
 import { findRelatedComponent } from './utils'
-import { stringify, classify, camelize, set, parse, getComponentName } from '../util'
+import { stringify, classify, camelize, set, parse, getComponentName, getLivewireComponentById, getLivewireVersion } from '../util'
 import ComponentSelector from './component-selector'
 import SharedData, { init as initSharedData } from 'src/shared-data'
 
@@ -20,6 +20,7 @@ let currentInspectedId
 let bridge
 let filter = ''
 let captureCount = 0
+let livewireVersion
 const isLegacy = false
 const rootUID = 0
 
@@ -39,7 +40,13 @@ function connect () {
     return
   }
 
-  if (!hook.Livewire.devToolsEnabled) {
+  const livewireVersion = getLivewireVersion();
+
+  //turn off devtools if explicitly set to false
+  if (
+    hook.Livewire.hasOwnProperty("devToolsEnabled") &&
+    !hook.Livewire.devToolsEnabled
+  ) {
     return
   }
 
@@ -63,7 +70,7 @@ function connect () {
 
   bridge.on('select-instance', id => {
     currentInspectedId = id
-    const instance = hook.Livewire.components.componentsById[id]
+    const instance = getLivewireComponentById(id, hook.Livewire)
 
     bindToConsole(instance)
     flush()
@@ -71,7 +78,7 @@ function connect () {
   })
 
   bridge.on('scroll-to-instance', id => {
-    const instance = hook.Livewire.components.componentsById[id]
+    const instance = getLivewireComponentById(id, hook.Livewire)
     instance && scrollIntoView(instance)
   })
 
@@ -85,7 +92,13 @@ function connect () {
     const parsedState = parsedPayload.state
 
     Object.keys(parsedState).forEach(key => {
-      hook.Livewire.components.componentsById[parsedPayload.component].set(key, parsedState[key])
+      const component = getLivewireComponentById(
+        parsedPayload.component,
+        hook.Livewire
+      )
+      getLivewireVersion() === 3
+        ? component.$wire.set(key, parsedState[key])
+        : component.set(key, parsedState[key])
     })
   })
 
@@ -95,7 +108,7 @@ function connect () {
     let instance
 
     try {
-      instance = hook.Livewire.components.componentsById[id]
+      instance = getLivewireComponentById(id, hook.Livewire)
     } catch (err) {
       return
     }
@@ -137,10 +150,8 @@ function connect () {
 
   window.__LIVEWIRE_DEVTOOLS_INSPECT__ = inspectInstance
 
-  const livewireHook = hook.Livewire.components.hooks.availableHooks.includes('responseReceived') ? 'responseReceived' : 'message.received'
-
   bridge.log('backend ready.')
-  bridge.send('ready', livewireHook === 'message.received' ? '2.x' : '1.x') // TODO: Detect version
+  bridge.send("ready", livewireVersion + ".x")
   console.log(
     '%c livewire-devtools %c Detected Livewire %c',
     'background:#3182ce ; padding: 1px; border-radius: 3px 0 0 3px;  color: #fff',
@@ -148,9 +159,26 @@ function connect () {
     'background:transparent'
   )
 
-  hook.Livewire.hook(livewireHook, (component, payload) => {
-    flush()
-  })
+  if (livewireVersion === 3) {
+    hook.Livewire.hook(
+      "commit",
+      ({ component, commit, respond, succeed, fail }) => {
+        succeed(({ snapshot, effect }) => {
+          flush()
+        })
+      }
+    )
+  } else {
+    const livewireHook = hook.Livewire.components.hooks.availableHooks.includes(
+      "responseReceived"
+    )
+      ? "responseReceived"
+      : "message.received"
+    hook.Livewire.hook(livewireHook, (component, payload) => {
+      flush()
+    })
+  }
+
 
   scan()
 }
@@ -161,7 +189,11 @@ function connect () {
 
 function scan () {
   rootInstances.length = 0
-  hook.Livewire.components.components().forEach((component) => {
+  const components =
+    getLivewireVersion() === 3
+      ? hook.Livewire.all()
+      : hook.Livewire.components.components()
+  components.forEach((component) => {
     rootInstances.push(component)
   })
   flush()
@@ -240,9 +272,17 @@ function findQualifiedChildrenFromList (instances) {
  */
 
 function findQualifiedChildren (instance) {
+  let children
+
+  if (instance.serverMemo && instance.serverMemo.children) {
+      children = instance.serverMemo.children
+  } else if (instance.snapshot && instance.snapshot.memo && instance.snapshot.memo.children) {
+      children = instance.snapshot.memo.children
+  }
+
   return isQualified(instance)
     ? capture(instance)
-    : findQualifiedChildrenFromList(instance.$children)
+    : (children ? findQualifiedChildrenFromList(children) : [])
 }
 
 /**
@@ -316,7 +356,7 @@ function getInstanceDetails (id) {
   let instance
 
   try {
-    instance = hook.Livewire.components.componentsById[id]
+    instance = getLivewireComponentById(id, hook.Livewire)
   } catch (err) {
     return {}
   }
@@ -371,11 +411,9 @@ export function reduceStateList (list) {
  */
 
 export function getInstanceName (instance) {
-  const name = getComponentName(instance.$options)
+  const name = getComponentName(instance)
   if (name) return name
-  return instance.$root === instance
-    ? 'Root'
-    : 'Anonymous Component'
+  return 'Anonymous Component'
 }
 
 /**
@@ -388,10 +426,11 @@ export function getInstanceName (instance) {
  */
 
 function processState (instance) {
-  return Object.keys(instance.data)
+  const instanceData = getLivewireVersion() === 3 ? instance.snapshot.data : instance.data;
+  return Object.keys(instanceData)
     .map(key => ({
       key,
-      value: instance.data[key],
+      value: instanceData[key],
       editable: true
     }))
 }
@@ -470,9 +509,10 @@ export function inspectInstance (instance) {
 
 function setStateValue ({ id, path, value, newKey, remove }) {
   let instance
+  const livewireVersion = getLivewireVersion()
 
   try {
-    instance = hook.Livewire.components.componentsById[id]
+    instance = getLivewireComponentById(id, hook.Livewire)
   } catch (err) {
     //
   }
@@ -482,7 +522,9 @@ function setStateValue ({ id, path, value, newKey, remove }) {
       if (value) {
         parsedValue = parse(value, true)
       }
-      instance.set(path, parsedValue)
+      livewireVersion === 3
+        ? instance.$wire.set(path, parsedValue, true)
+        : instance.set(path, parsedValue)
     } catch (e) {
       console.error(e)
     }
