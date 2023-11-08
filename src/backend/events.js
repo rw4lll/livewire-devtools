@@ -41,7 +41,7 @@ export function initEventsBackend (Livewire, bridge) {
       Livewire.dispatch = function (...args) {
         const res = original.apply(this, args)
         if (recording) {
-          logEvent(Livewire, "dispatch", args[0], args[1], args[2])
+          logEvent(Livewire, "dispatch", null, args[0], args.slice(1))
         }
         return res
       }

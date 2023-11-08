@@ -1,7 +1,7 @@
 {
   "name": "Livewire devtools",
-  "version": "1.1.0",
-  "version_name": "1.1.0-firefox",
+  "version": "1.1.1",
+  "version_name": "1.1.1-firefox",
   "description": "Chrome and Firefox DevTools extension for debugging Livewire applications.",
   "manifest_version": 2,
   "icons": {
